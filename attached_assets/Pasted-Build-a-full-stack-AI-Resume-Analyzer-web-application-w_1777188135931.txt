@@ -1,0 +1,133 @@
+Build a full-stack AI Resume Analyzer web application with the following features and architecture. The app should be production-ready, modular, and cleanly structured.
+
+### 🔧 Tech Stack
+
+* Backend: Python using FastAPI
+* Frontend: React (with modern UI, responsive design)
+* Authentication: Google OAuth 2.0 login
+* Email verification: Send OTP to user's email after login
+* AI Integration: OpenAI API (GPT model) OR Ollama (for local LLM support)
+* PDF Parsing: PyMuPDF
+* Optional: Use FAISS for advanced job recommendation
+
+---
+
+### 📌 Core Features
+
+1. **User Authentication**
+
+   * Implement Google Login (OAuth 2.0)
+   * After login, send a 6-digit OTP to the user’s email
+   * Verify OTP before allowing access to dashboard
+   * Store user session securely
+
+2. **Resume Upload & Parsing**
+
+   * Allow user to upload PDF resume
+   * Extract full text using PyMuPDF
+   * Clean and preprocess text
+
+3. **ATS Score Checker**
+
+   * Calculate ATS score based on:
+
+     * Keyword matching
+     * Skills relevance
+     * Experience indicators
+   * Display score out of 100
+
+4. **AI Resume Analysis**
+   Use LLM with this prompt:
+
+   "Act as an ATS system for software engineering roles.
+   Analyze the resume and provide:
+
+   * ATS score (out of 100)
+   * Missing keywords
+   * Weak areas
+   * Improvements
+   * 3 improved resume bullet points"
+
+5. **Job Recommendation Engine**
+
+   * Extract skills from resume
+   * Match against predefined roles (backend, frontend, data, etc.)
+   * Recommend top 5 job roles
+   * For each role provide:
+
+     * Match percentage
+     * Missing skills
+     * Learning roadmap (2–4 weeks)
+
+6. **Unified AI Output**
+   Use a combined prompt:
+
+   "You are an AI career assistant.
+   Analyze this resume and return:
+
+   1. ATS score
+   2. Missing keywords
+   3. Improvements
+   4. Top 5 job roles
+   5. Skill gaps per role
+   6. Personalized roadmap"
+
+7. **Dashboard UI**
+
+   * Show ATS score (progress bar)
+   * Show job recommendations
+   * Show missing skills
+   * Clean cards and sections
+
+---
+
+### 🧠 Backend Requirements
+
+* FastAPI with proper routes:
+
+  * /login
+  * /verify-otp
+  * /upload-resume
+  * /analyze
+* Modular code:
+
+  * auth.py
+  * resume_parser.py
+  * ats.py
+  * ai_engine.py
+  * recommender.py
+
+---
+
+### 💻 Frontend Requirements
+
+* React app with:
+
+  * Login page
+  * OTP verification page
+  * Dashboard
+* Use modern UI (cards, charts, loading states)
+* Use Axios to call backend APIs
+
+---
+
+### 🔐 Security & Best Practices
+
+* Use environment variables for API keys
+* Validate file uploads
+* Handle API errors properly
+* Clean code and comments
+
+---
+
+### ▶️ Running Instructions
+
+* Include steps to install dependencies
+* Run backend using: uvicorn main:app --reload
+* Run frontend using: npm start
+
+---
+
+### 🎯 Goal
+
+The project should look like a real SaaS product and be suitable for showcasing on a resume. Code should be clean, modular, and easy to explain in interviews.

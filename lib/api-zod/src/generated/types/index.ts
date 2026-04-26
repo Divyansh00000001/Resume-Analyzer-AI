@@ -6,4 +6,14 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./activityItem";
+export * from "./analyzeResumePayload";
+export * from "./dashboardSummary";
 export * from "./healthStatus";
+export * from "./jobRole";
+export * from "./recommendedRole";
+export * from "./resume";
+export * from "./resumeSummary";
+export * from "./roadmapWeek";
+export * from "./topRoleMatch";
+export * from "./uploadResumePayload";

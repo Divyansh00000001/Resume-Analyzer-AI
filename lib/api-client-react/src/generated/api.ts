@@ -5,18 +5,29 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  AnalyzeResumePayload,
+  DashboardSummary,
+  HealthStatus,
+  JobRole,
+  Resume,
+  ResumeSummary,
+  UploadResumePayload,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -92,6 +103,573 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List the authenticated user's resumes
+ */
+export const getListResumesUrl = () => {
+  return `/api/resumes`;
+};
+
+export const listResumes = async (
+  options?: RequestInit,
+): Promise<ResumeSummary[]> => {
+  return customFetch<ResumeSummary[]>(getListResumesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListResumesQueryKey = () => {
+  return [`/api/resumes`] as const;
+};
+
+export const getListResumesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listResumes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listResumes>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListResumesQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listResumes>>> = ({
+    signal,
+  }) => listResumes({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listResumes>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListResumesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listResumes>>
+>;
+export type ListResumesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List the authenticated user's resumes
+ */
+
+export function useListResumes<
+  TData = Awaited<ReturnType<typeof listResumes>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listResumes>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListResumesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Upload a resume PDF as a base64 string
+ */
+export const getUploadResumeUrl = () => {
+  return `/api/resumes`;
+};
+
+export const uploadResume = async (
+  uploadResumePayload: UploadResumePayload,
+  options?: RequestInit,
+): Promise<Resume> => {
+  return customFetch<Resume>(getUploadResumeUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(uploadResumePayload),
+  });
+};
+
+export const getUploadResumeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadResume>>,
+    TError,
+    { data: BodyType<UploadResumePayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof uploadResume>>,
+  TError,
+  { data: BodyType<UploadResumePayload> },
+  TContext
+> => {
+  const mutationKey = ["uploadResume"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof uploadResume>>,
+    { data: BodyType<UploadResumePayload> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return uploadResume(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UploadResumeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof uploadResume>>
+>;
+export type UploadResumeMutationBody = BodyType<UploadResumePayload>;
+export type UploadResumeMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Upload a resume PDF as a base64 string
+ */
+export const useUploadResume = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadResume>>,
+    TError,
+    { data: BodyType<UploadResumePayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof uploadResume>>,
+  TError,
+  { data: BodyType<UploadResumePayload> },
+  TContext
+> => {
+  return useMutation(getUploadResumeMutationOptions(options));
+};
+
+/**
+ * @summary Get a single resume with full analysis
+ */
+export const getGetResumeUrl = (id: number) => {
+  return `/api/resumes/${id}`;
+};
+
+export const getResume = async (
+  id: number,
+  options?: RequestInit,
+): Promise<Resume> => {
+  return customFetch<Resume>(getGetResumeUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetResumeQueryKey = (id: number) => {
+  return [`/api/resumes/${id}`] as const;
+};
+
+export const getGetResumeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getResume>>,
+  TError = ErrorType<unknown>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getResume>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetResumeQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getResume>>> = ({
+    signal,
+  }) => getResume(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getResume>>, TError, TData> & {
+    queryKey: QueryKey;
+  };
+};
+
+export type GetResumeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getResume>>
+>;
+export type GetResumeQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get a single resume with full analysis
+ */
+
+export function useGetResume<
+  TData = Awaited<ReturnType<typeof getResume>>,
+  TError = ErrorType<unknown>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getResume>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetResumeQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Delete a resume
+ */
+export const getDeleteResumeUrl = (id: number) => {
+  return `/api/resumes/${id}`;
+};
+
+export const deleteResume = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteResumeUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteResumeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteResume>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteResume>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteResume"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteResume>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteResume(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteResumeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteResume>>
+>;
+
+export type DeleteResumeMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a resume
+ */
+export const useDeleteResume = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteResume>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteResume>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteResumeMutationOptions(options));
+};
+
+/**
+ * @summary Run AI analysis on a resume (ATS score, missing keywords, improvements, role recommendations)
+ */
+export const getAnalyzeResumeUrl = (id: number) => {
+  return `/api/resumes/${id}/analyze`;
+};
+
+export const analyzeResume = async (
+  id: number,
+  analyzeResumePayload?: AnalyzeResumePayload,
+  options?: RequestInit,
+): Promise<Resume> => {
+  return customFetch<Resume>(getAnalyzeResumeUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(analyzeResumePayload),
+  });
+};
+
+export const getAnalyzeResumeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeResume>>,
+    TError,
+    { id: number; data: BodyType<AnalyzeResumePayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof analyzeResume>>,
+  TError,
+  { id: number; data: BodyType<AnalyzeResumePayload> },
+  TContext
+> => {
+  const mutationKey = ["analyzeResume"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof analyzeResume>>,
+    { id: number; data: BodyType<AnalyzeResumePayload> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return analyzeResume(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AnalyzeResumeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof analyzeResume>>
+>;
+export type AnalyzeResumeMutationBody = BodyType<AnalyzeResumePayload>;
+export type AnalyzeResumeMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Run AI analysis on a resume (ATS score, missing keywords, improvements, role recommendations)
+ */
+export const useAnalyzeResume = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeResume>>,
+    TError,
+    { id: number; data: BodyType<AnalyzeResumePayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof analyzeResume>>,
+  TError,
+  { id: number; data: BodyType<AnalyzeResumePayload> },
+  TContext
+> => {
+  return useMutation(getAnalyzeResumeMutationOptions(options));
+};
+
+/**
+ * @summary List the predefined job roles available for matching
+ */
+export const getListJobRolesUrl = () => {
+  return `/api/jobs/roles`;
+};
+
+export const listJobRoles = async (
+  options?: RequestInit,
+): Promise<JobRole[]> => {
+  return customFetch<JobRole[]>(getListJobRolesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListJobRolesQueryKey = () => {
+  return [`/api/jobs/roles`] as const;
+};
+
+export const getListJobRolesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listJobRoles>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listJobRoles>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListJobRolesQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listJobRoles>>> = ({
+    signal,
+  }) => listJobRoles({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listJobRoles>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListJobRolesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listJobRoles>>
+>;
+export type ListJobRolesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List the predefined job roles available for matching
+ */
+
+export function useListJobRoles<
+  TData = Awaited<ReturnType<typeof listJobRoles>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listJobRoles>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListJobRolesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Aggregated counts and averages for the user's dashboard
+ */
+export const getGetDashboardSummaryUrl = () => {
+  return `/api/stats/summary`;
+};
+
+export const getDashboardSummary = async (
+  options?: RequestInit,
+): Promise<DashboardSummary> => {
+  return customFetch<DashboardSummary>(getGetDashboardSummaryUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetDashboardSummaryQueryKey = () => {
+  return [`/api/stats/summary`] as const;
+};
+
+export const getGetDashboardSummaryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDashboardSummary>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getDashboardSummary>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetDashboardSummaryQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getDashboardSummary>>
+  > = ({ signal }) => getDashboardSummary({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getDashboardSummary>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetDashboardSummaryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getDashboardSummary>>
+>;
+export type GetDashboardSummaryQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Aggregated counts and averages for the user's dashboard
+ */
+
+export function useGetDashboardSummary<
+  TData = Awaited<ReturnType<typeof getDashboardSummary>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getDashboardSummary>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetDashboardSummaryQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

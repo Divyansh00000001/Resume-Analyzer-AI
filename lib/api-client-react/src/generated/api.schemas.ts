@@ -8,3 +8,106 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface UploadResumePayload {
+  fileName: string;
+  /** Base64-encoded PDF file contents (data URL prefix is stripped server-side) */
+  fileBase64: string;
+}
+
+export interface AnalyzeResumePayload {
+  /**
+   * Optional target role to bias the analysis toward (e.g. Backend Engineer)
+   * @nullable
+   */
+  targetRole?: string | null;
+}
+
+export interface ResumeSummary {
+  id: number;
+  fileName: string;
+  /** @nullable */
+  atsScore?: number | null;
+  /** @nullable */
+  topRole?: string | null;
+  /** One of "uploaded" | "analyzing" | "analyzed" | "failed" */
+  status: string;
+  createdAt: string;
+}
+
+export interface RoadmapWeek {
+  week: number;
+  focus: string;
+  tasks: string[];
+}
+
+export interface RecommendedRole {
+  role: string;
+  matchPercent: number;
+  missingSkills: string[];
+  matchedSkills: string[];
+  roadmap: RoadmapWeek[];
+}
+
+export interface Resume {
+  id: number;
+  fileName: string;
+  rawText: string;
+  status: string;
+  /** @nullable */
+  atsScore?: number | null;
+  /** @nullable */
+  keywordScore?: number | null;
+  /** @nullable */
+  skillScore?: number | null;
+  /** @nullable */
+  experienceScore?: number | null;
+  extractedSkills: string[];
+  missingKeywords: string[];
+  weakAreas: string[];
+  improvements: string[];
+  improvedBullets: string[];
+  recommendedRoles: RecommendedRole[];
+  /**
+   * A short AI-written narrative summary of the candidate
+   * @nullable
+   */
+  summary?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JobRole {
+  slug: string;
+  title: string;
+  category: string;
+  description: string;
+  coreSkills: string[];
+  niceToHaveSkills: string[];
+}
+
+export interface TopRoleMatch {
+  role: string;
+  averageMatch: number;
+  appearances: number;
+}
+
+export interface ActivityItem {
+  id: number;
+  fileName: string;
+  /** @nullable */
+  atsScore?: number | null;
+  status: string;
+  createdAt: string;
+}
+
+export interface DashboardSummary {
+  totalResumes: number;
+  analyzedResumes: number;
+  /** @nullable */
+  averageAtsScore?: number | null;
+  /** @nullable */
+  bestAtsScore?: number | null;
+  topRoleMatches: TopRoleMatch[];
+  recentActivity: ActivityItem[];
+}

@@ -14,3 +14,175 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary List the authenticated user's resumes
+ */
+export const ListResumesResponseItem = zod.object({
+  id: zod.number(),
+  fileName: zod.string(),
+  atsScore: zod.number().nullish(),
+  topRole: zod.string().nullish(),
+  status: zod
+    .string()
+    .describe(
+      'One of \"uploaded\" | \"analyzing\" | \"analyzed\" | \"failed\"',
+    ),
+  createdAt: zod.coerce.date(),
+});
+export const ListResumesResponse = zod.array(ListResumesResponseItem);
+
+/**
+ * @summary Upload a resume PDF as a base64 string
+ */
+export const UploadResumeBody = zod.object({
+  fileName: zod.string(),
+  fileBase64: zod
+    .string()
+    .describe(
+      "Base64-encoded PDF file contents (data URL prefix is stripped server-side)",
+    ),
+});
+
+/**
+ * @summary Get a single resume with full analysis
+ */
+export const GetResumeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetResumeResponse = zod.object({
+  id: zod.number(),
+  fileName: zod.string(),
+  rawText: zod.string(),
+  status: zod.string(),
+  atsScore: zod.number().nullish(),
+  keywordScore: zod.number().nullish(),
+  skillScore: zod.number().nullish(),
+  experienceScore: zod.number().nullish(),
+  extractedSkills: zod.array(zod.string()),
+  missingKeywords: zod.array(zod.string()),
+  weakAreas: zod.array(zod.string()),
+  improvements: zod.array(zod.string()),
+  improvedBullets: zod.array(zod.string()),
+  recommendedRoles: zod.array(
+    zod.object({
+      role: zod.string(),
+      matchPercent: zod.number(),
+      missingSkills: zod.array(zod.string()),
+      matchedSkills: zod.array(zod.string()),
+      roadmap: zod.array(
+        zod.object({
+          week: zod.number(),
+          focus: zod.string(),
+          tasks: zod.array(zod.string()),
+        }),
+      ),
+    }),
+  ),
+  summary: zod
+    .string()
+    .nullish()
+    .describe("A short AI-written narrative summary of the candidate"),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a resume
+ */
+export const DeleteResumeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Run AI analysis on a resume (ATS score, missing keywords, improvements, role recommendations)
+ */
+export const AnalyzeResumeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const AnalyzeResumeBody = zod.object({
+  targetRole: zod
+    .string()
+    .nullish()
+    .describe(
+      "Optional target role to bias the analysis toward (e.g. Backend Engineer)",
+    ),
+});
+
+export const AnalyzeResumeResponse = zod.object({
+  id: zod.number(),
+  fileName: zod.string(),
+  rawText: zod.string(),
+  status: zod.string(),
+  atsScore: zod.number().nullish(),
+  keywordScore: zod.number().nullish(),
+  skillScore: zod.number().nullish(),
+  experienceScore: zod.number().nullish(),
+  extractedSkills: zod.array(zod.string()),
+  missingKeywords: zod.array(zod.string()),
+  weakAreas: zod.array(zod.string()),
+  improvements: zod.array(zod.string()),
+  improvedBullets: zod.array(zod.string()),
+  recommendedRoles: zod.array(
+    zod.object({
+      role: zod.string(),
+      matchPercent: zod.number(),
+      missingSkills: zod.array(zod.string()),
+      matchedSkills: zod.array(zod.string()),
+      roadmap: zod.array(
+        zod.object({
+          week: zod.number(),
+          focus: zod.string(),
+          tasks: zod.array(zod.string()),
+        }),
+      ),
+    }),
+  ),
+  summary: zod
+    .string()
+    .nullish()
+    .describe("A short AI-written narrative summary of the candidate"),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary List the predefined job roles available for matching
+ */
+export const ListJobRolesResponseItem = zod.object({
+  slug: zod.string(),
+  title: zod.string(),
+  category: zod.string(),
+  description: zod.string(),
+  coreSkills: zod.array(zod.string()),
+  niceToHaveSkills: zod.array(zod.string()),
+});
+export const ListJobRolesResponse = zod.array(ListJobRolesResponseItem);
+
+/**
+ * @summary Aggregated counts and averages for the user's dashboard
+ */
+export const GetDashboardSummaryResponse = zod.object({
+  totalResumes: zod.number(),
+  analyzedResumes: zod.number(),
+  averageAtsScore: zod.number().nullish(),
+  bestAtsScore: zod.number().nullish(),
+  topRoleMatches: zod.array(
+    zod.object({
+      role: zod.string(),
+      averageMatch: zod.number(),
+      appearances: zod.number(),
+    }),
+  ),
+  recentActivity: zod.array(
+    zod.object({
+      id: zod.number(),
+      fileName: zod.string(),
+      atsScore: zod.number().nullish(),
+      status: zod.string(),
+      createdAt: zod.coerce.date(),
+    }),
+  ),
+});

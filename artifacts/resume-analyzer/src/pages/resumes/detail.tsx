@@ -11,7 +11,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { 
   FileText, Loader2, AlertCircle, RefreshCw, Trash2, Copy, 
-  CheckCircle2, XCircle, ArrowRight, ChevronDown, ChevronUp, Map
+  CheckCircle2, XCircle, ArrowRight, ChevronDown, ChevronUp, Map, Target
 } from "lucide-react";
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
 
